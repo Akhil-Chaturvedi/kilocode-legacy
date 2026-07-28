@@ -17,9 +17,10 @@ import { convertToZAiFormat } from "../transform/zai-format"
 import type { ApiHandlerCreateMessageMetadata } from "../index"
 import { BaseOpenAiCompatibleProvider } from "./base-openai-compatible-provider"
 
-// Custom interface for Z.ai params to support thinking mode
+// Custom interface for Z.ai params to support thinking mode and reasoning effort
 type ZAiChatCompletionParams = OpenAI.Chat.ChatCompletionCreateParamsStreaming & {
 	thinking?: { type: "enabled" | "disabled" }
+	reasoning_effort?: string
 }
 
 export class ZAiHandler extends BaseOpenAiCompatibleProvider<string> {
@@ -104,6 +105,10 @@ export class ZAiHandler extends BaseOpenAiCompatibleProvider<string> {
 			stream_options: { include_usage: true },
 			// Thinking is ON by default, so we explicitly disable when needed.
 			thinking: useReasoning ? { type: "enabled" } : { type: "disabled" },
+			// Pass reasoning_effort when thinking is enabled (GLM-5.2 uses "max" by default)
+			...(useReasoning && {
+				reasoning_effort: this.options.reasoningEffort || info.reasoningEffort,
+			}),
 			...(metadata?.tools && { tools: this.convertToolsForOpenAI(metadata.tools) }),
 			...(metadata?.tool_choice && { tool_choice: metadata.tool_choice }),
 			...(metadata?.toolProtocol === "native" && {

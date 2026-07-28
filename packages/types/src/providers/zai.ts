@@ -211,6 +211,26 @@ export const internationalZAiModels = {
 		description:
 			"GLM-5.1 is the latest iteration of the GLM-5 series, available via the GLM Coding Plan with enhanced capabilities for coding and agentic tasks.",
 	},
+	// kilocode_change start
+	"glm-5.2": {
+		maxTokens: 131_072,
+		contextWindow: 1_000_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		supportsReasoningEffort: ["disable", "medium", "high", "max"],
+		reasoningEffort: "max",
+		preserveReasoning: true,
+		inputPrice: 0,
+		outputPrice: 0,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0,
+		description:
+			"GLM-5.2 is Z.AI's flagship model with 1M context, 128K max output, thinking mode, function calling, and context caching.",
+		preferredIndex: 0,
+	},
+	// kilocode_change end
 	"glm-4.7-flash": {
 		maxTokens: 16_384,
 		contextWindow: 200_000,
@@ -412,6 +432,26 @@ export const mainlandZAiModels = {
 		description:
 			"GLM-5.1 is the latest iteration of the GLM-5 series, available via the GLM Coding Plan with enhanced capabilities for coding and agentic tasks.",
 	},
+	// kilocode_change start
+	"glm-5.2": {
+		maxTokens: 131_072,
+		contextWindow: 1_000_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		supportsReasoningEffort: ["disable", "medium", "high", "max"],
+		reasoningEffort: "max",
+		preserveReasoning: true,
+		inputPrice: 0,
+		outputPrice: 0,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0,
+		description:
+			"GLM-5.2 is Z.AI's flagship model with 1M context, 128K max output, thinking mode, function calling, and context caching.",
+		preferredIndex: 0,
+	},
+	// kilocode_change end
 	"glm-4.7-flash": {
 		maxTokens: 16_384,
 		contextWindow: 204_800,

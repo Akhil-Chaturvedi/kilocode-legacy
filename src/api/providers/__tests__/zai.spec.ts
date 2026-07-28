@@ -127,6 +127,25 @@ describe("ZAiHandler", () => {
 		})
 		// kilocode_change end
 
+		// kilocode_change start
+		it("should return GLM-5.2 international model with 1M context and max reasoning", () => {
+			const testModelId: InternationalZAiModelId = "glm-5.2"
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: testModelId,
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "international_coding",
+			})
+			const model = handlerWithModel.getModel()
+			expect(model.id).toBe(testModelId)
+			expect(model.info).toEqual(internationalZAiModels[testModelId])
+			expect(model.info.contextWindow).toBe(1_000_000)
+			expect(model.info.maxTokens).toBe(131_072)
+			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium", "high", "max"])
+			expect(model.info.reasoningEffort).toBe("max")
+			expect(model.info.preserveReasoning).toBe(true)
+		})
+		// kilocode_change end
+
 		it("should return GLM-4.5v international model with vision support", () => {
 			const testModelId: InternationalZAiModelId = "glm-4.5v"
 			const handlerWithModel = new ZAiHandler({
@@ -241,6 +260,25 @@ describe("ZAiHandler", () => {
 			expect(model.info.preserveReasoning).toBe(true)
 		})
 		// kilocode_change end
+
+		// kilocode_change start
+		it("should return GLM-5.2 China model with 1M context and max reasoning", () => {
+			const testModelId: MainlandZAiModelId = "glm-5.2"
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: testModelId,
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "china_coding",
+			})
+			const model = handlerWithModel.getModel()
+			expect(model.id).toBe(testModelId)
+			expect(model.info).toEqual(mainlandZAiModels[testModelId])
+			expect(model.info.contextWindow).toBe(1_000_000)
+			expect(model.info.maxTokens).toBe(131_072)
+			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium", "high", "max"])
+			expect(model.info.reasoningEffort).toBe("max")
+			expect(model.info.preserveReasoning).toBe(true)
+		})
+		// kilocode_change end
 	})
 
 	describe("International API", () => {
@@ -297,6 +335,24 @@ describe("ZAiHandler", () => {
 			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium"])
 		})
 		// kilocode_change end
+
+		// kilocode_change start
+		it("should return GLM-5.2 international API model with 1M context and max reasoning", () => {
+			const testModelId: InternationalZAiModelId = "glm-5.2"
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: testModelId,
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "international_api",
+			})
+			const model = handlerWithModel.getModel()
+			expect(model.id).toBe(testModelId)
+			expect(model.info).toEqual(internationalZAiModels[testModelId])
+			expect(model.info.contextWindow).toBe(1_000_000)
+			expect(model.info.maxTokens).toBe(131_072)
+			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium", "high", "max"])
+			expect(model.info.reasoningEffort).toBe("max")
+		})
+		// kilocode_change end
 	})
 
 	describe("China API", () => {
@@ -351,6 +407,24 @@ describe("ZAiHandler", () => {
 			expect(model.info.contextWindow).toBe(200_000)
 			expect(model.info.maxTokens).toBe(131_072)
 			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium"])
+		})
+		// kilocode_change end
+
+		// kilocode_change start
+		it("should return GLM-5.2 China API model with 1M context and max reasoning", () => {
+			const testModelId: MainlandZAiModelId = "glm-5.2"
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: testModelId,
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "china_api",
+			})
+			const model = handlerWithModel.getModel()
+			expect(model.id).toBe(testModelId)
+			expect(model.info).toEqual(mainlandZAiModels[testModelId])
+			expect(model.info.contextWindow).toBe(1_000_000)
+			expect(model.info.maxTokens).toBe(131_072)
+			expect(model.info.supportsReasoningEffort).toEqual(["disable", "medium", "high", "max"])
+			expect(model.info.reasoningEffort).toBe("max")
 		})
 		// kilocode_change end
 	})
@@ -661,6 +735,99 @@ describe("ZAiHandler", () => {
 			// For GLM-4.6 (no thinking support), thinking parameter should not be present
 			const callArgs = mockCreate.mock.calls[0][0]
 			expect(callArgs.thinking).toBeUndefined()
+		})
+
+		it("should enable thinking by default for GLM-5.2 (default reasoningEffort is max)", async () => {
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: "glm-5.2",
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "international_coding",
+			})
+
+			mockCreate.mockImplementationOnce(() => {
+				return {
+					[Symbol.asyncIterator]: () => ({
+						async next() {
+							return { done: true }
+						},
+					}),
+				}
+			})
+
+			const messageGenerator = handlerWithModel.createMessage("system prompt", [])
+			await messageGenerator.next()
+
+			expect(mockCreate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					model: "glm-5.2",
+					thinking: { type: "enabled" },
+					reasoning_effort: "max",
+				}),
+			)
+		})
+
+		it("should disable thinking for GLM-5.2 when reasoningEffort is set to disable", async () => {
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: "glm-5.2",
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "international_coding",
+				enableReasoningEffort: true,
+				reasoningEffort: "disable",
+			})
+
+			mockCreate.mockImplementationOnce(() => {
+				return {
+					[Symbol.asyncIterator]: () => ({
+						async next() {
+							return { done: true }
+						},
+					}),
+				}
+			})
+
+			const messageGenerator = handlerWithModel.createMessage("system prompt", [])
+			await messageGenerator.next()
+
+			expect(mockCreate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					model: "glm-5.2",
+					thinking: { type: "disabled" },
+				}),
+			)
+			// reasoning_effort should NOT be present when thinking is disabled
+			const callArgs = mockCreate.mock.calls[0][0]
+			expect(callArgs.reasoning_effort).toBeUndefined()
+		})
+
+		it("should pass reasoning_effort for GLM-5.2 when thinking is enabled", async () => {
+			const handlerWithModel = new ZAiHandler({
+				apiModelId: "glm-5.2",
+				zaiApiKey: "test-zai-api-key",
+				zaiApiLine: "international_coding",
+				enableReasoningEffort: true,
+				reasoningEffort: "high",
+			})
+
+			mockCreate.mockImplementationOnce(() => {
+				return {
+					[Symbol.asyncIterator]: () => ({
+						async next() {
+							return { done: true }
+						},
+					}),
+				}
+			})
+
+			const messageGenerator = handlerWithModel.createMessage("system prompt", [])
+			await messageGenerator.next()
+
+			expect(mockCreate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					model: "glm-5.2",
+					thinking: { type: "enabled" },
+					reasoning_effort: "high",
+				}),
+			)
 		})
 	})
 	// kilocode_change end
