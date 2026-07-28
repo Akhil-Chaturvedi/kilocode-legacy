@@ -112,3 +112,57 @@ function checkIsCerebrasContextWindowError(response: unknown): boolean {
 		return false
 	}
 }
+
+// kilocode_change start
+/**
+ * Differentiates between body size overflow (e.g., base64 images too large) and token overflow.
+ * Body size overflow cannot be fixed by compaction - it requires reducing image quality or removing images.
+ * Token overflow can be fixed by compaction/truncation.
+ *
+ * @param error - The error to check
+ * @returns "body_size" if the error is a body size overflow, "token" if it's a token overflow, or undefined if neither
+ */
+export function checkContextOverflowType(error: unknown): "body_size" | "token" | undefined {
+	try {
+		if (!error || typeof error !== "object") {
+			return undefined
+		}
+
+		const err = error as Record<string, any>
+		const status = String(err.status ?? err.code ?? err.error?.status ?? err.response?.status ?? "")
+		const message: string = String(err.message || err.error?.message || "")
+
+		// Body size overflow patterns - these can't be fixed by compaction
+		const BODY_SIZE_PATTERNS = [
+			/request.*too\s*large/i,
+			/payload.*too\s*large/i,
+			/body.*(?:size|exceed|too\s*large)/i,
+			/content.*(?:size|exceed|too\s*large)/i,
+			/message.*too\s*large/i,
+			/request\s*entity\s*too\s*large/i,
+		] as const
+
+		if (String(status) === "400" && BODY_SIZE_PATTERNS.some((pattern) => pattern.test(message))) {
+			return "body_size"
+		}
+
+		// Token overflow patterns - these CAN be fixed by compaction
+		const TOKEN_PATTERNS = [
+			/\bcontext\s*(?:length|window)\b/i,
+			/\bmaximum\s*context\b/i,
+			/\b(?:input\s*)?tokens?\s*exceed/i,
+			/\btoo\s*many\s*tokens?\b/i,
+			/token.*limit/i,
+			/context_length_exceeded/i,
+		] as const
+
+		if (String(status) === "400" && TOKEN_PATTERNS.some((pattern) => pattern.test(message))) {
+			return "token"
+		}
+
+		return undefined
+	} catch {
+		return undefined
+	}
+}
+// kilocode_change end

@@ -324,9 +324,9 @@ function getSelectedModel({
 			const configuredId = apiConfiguration.apiModelId ?? defaultModelId
 			const isKimiCodingEndpoint = apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1"
 			const firstNonCodingMoonshotModelId =
-				Object.keys(moonshotModels).find((modelId) => modelId !== "kimi-for-coding") ?? moonshotDefaultModelId
+				Object.keys(moonshotModels).find((modelId) => modelId !== "kimi-k2.7-code") ?? moonshotDefaultModelId
 			const id =
-				configuredId === "kimi-for-coding" && !isKimiCodingEndpoint
+				configuredId === "kimi-k2.7-code" && !isKimiCodingEndpoint
 					? firstNonCodingMoonshotModelId
 					: configuredId
 			// kilocode_change end

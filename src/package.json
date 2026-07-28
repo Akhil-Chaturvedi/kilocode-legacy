@@ -298,11 +298,6 @@
 				"category": "%configuration.title%"
 			},
 			{
-				"command": "kilo-code.popoutButtonClicked",
-				"title": "%command.openInEditor.title%",
-				"icon": "$(link-external)"
-			},
-			{
 				"command": "kilo-code.open",
 				"title": "%views.activitybar.title%",
 				"icon": {

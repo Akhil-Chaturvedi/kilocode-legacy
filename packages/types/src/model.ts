@@ -141,6 +141,16 @@ export const modelInfoSchema = z.object({
 
 	// kilocode_change start
 	/**
+	 * Maximum input size for a single request, in tokens.
+	 * Some models have a lower input limit than the total context window.
+	 * When set, context overflow detection uses this instead of the full context window.
+	 * This allows more accurate overflow detection for models like gpt-5 (400k window / 272k input).
+	 */
+	maxInputSize: z.number().optional(),
+	// kilocode_change end
+
+	// kilocode_change start
+	/**
 	 * List of supported API types for this model, e.g. ['chat-completions', 'responses']
 	 */
 	supportedApiTypes: z.array(z.string()).optional(),

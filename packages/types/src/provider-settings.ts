@@ -430,6 +430,10 @@ const doubaoSchema = apiModelIdProviderModelSchema.extend({
 	doubaoApiKey: z.string().optional(),
 })
 
+export const moonshotApiLineSchema = z.enum(["international", "china", "managed"])
+
+export type MoonshotApiLine = z.infer<typeof moonshotApiLineSchema>
+
 const moonshotSchema = apiModelIdProviderModelSchema.extend({
 	moonshotBaseUrl: z
 		.union([
@@ -438,6 +442,7 @@ const moonshotSchema = apiModelIdProviderModelSchema.extend({
 			z.literal("https://api.kimi.com/coding/v1"),
 		])
 		.optional(),
+	moonshotApiLine: moonshotApiLineSchema.optional(),
 	moonshotApiKey: z.string().optional(),
 })
 

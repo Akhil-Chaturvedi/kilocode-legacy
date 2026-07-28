@@ -368,7 +368,7 @@ describe("ApiOptions", () => {
 	})
 	// kilocode_change end
 
-	it("hides kimi-for-coding from model options when Moonshot endpoint is not coding", () => {
+	it("hides kimi-k2.7-code from model options when Moonshot endpoint is not coding", () => {
 		renderApiOptions({
 			apiConfiguration: {
 				apiProvider: "moonshot",
@@ -377,10 +377,10 @@ describe("ApiOptions", () => {
 			},
 		})
 
-		expect(screen.queryByRole("option", { name: "kimi-for-coding" })).not.toBeInTheDocument()
+		expect(screen.queryByRole("option", { name: "kimi-k2.7-code" })).not.toBeInTheDocument()
 	})
 
-	it("shows kimi-for-coding in model options when Moonshot endpoint is coding", () => {
+	it("shows kimi-k2.7-code in model options when Moonshot endpoint is coding", () => {
 		renderApiOptions({
 			apiConfiguration: {
 				apiProvider: "moonshot",
@@ -389,7 +389,7 @@ describe("ApiOptions", () => {
 			},
 		})
 
-		expect(screen.getByRole("option", { name: "kimi-for-coding" })).toBeInTheDocument()
+		expect(screen.getByRole("option", { name: "kimi-k2.7-code" })).toBeInTheDocument()
 		expect(screen.getByRole("option", { name: "kimi-k2-thinking" })).toBeInTheDocument() // kilocode_change
 	})
 

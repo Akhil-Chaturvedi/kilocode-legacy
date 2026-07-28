@@ -145,10 +145,10 @@ describe("MoonshotHandler", () => {
 			expect(model.info.supportsImages).toBe(true)
 		})
 
-		it("should expose image capability for kimi-for-coding", () => {
+		it("should expose image capability for kimi-k2.7-code", () => {
 			const strictHandler = new MoonshotHandler({
 				...mockOptions,
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 			})
 			const model = strictHandler.getModel()
 
@@ -285,6 +285,7 @@ describe("MoonshotHandler", () => {
 					providerOptions: {
 						moonshot: {
 							prompt_cache_key: "task-cache-1",
+							"thinking.keep": "all",
 						},
 					},
 				}),
@@ -322,6 +323,7 @@ describe("MoonshotHandler", () => {
 					providerOptions: {
 						moonshot: {
 							thinking: { type: "enabled" },
+							"thinking.keep": "all",
 						},
 					},
 				}),
@@ -359,6 +361,7 @@ describe("MoonshotHandler", () => {
 					providerOptions: {
 						moonshot: {
 							thinking: { type: "enabled" },
+							"thinking.keep": "all",
 						},
 					},
 				}),
@@ -368,7 +371,7 @@ describe("MoonshotHandler", () => {
 		it("should include prompt_cache_key alongside strict thinking controls when taskId is provided", async () => {
 			const strictHandler = new MoonshotHandler({
 				...mockOptions,
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 			})
 
 			async function* mockFullStream() {
@@ -398,16 +401,17 @@ describe("MoonshotHandler", () => {
 						moonshot: {
 							prompt_cache_key: "task-cache-2",
 							thinking: { type: "enabled" },
+							"thinking.keep": "all",
 						},
 					},
 				}),
 			)
 		})
 
-		it("should enforce strict thinking temperature/provider options for kimi-for-coding by default", async () => {
+		it("should enforce strict thinking temperature/provider options for kimi-k2.7-code by default", async () => {
 			const strictHandler = new MoonshotHandler({
 				...mockOptions,
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 				modelTemperature: 0.1,
 			})
 
@@ -435,6 +439,7 @@ describe("MoonshotHandler", () => {
 					providerOptions: {
 						moonshot: {
 							thinking: { type: "enabled" },
+							"thinking.keep": "all",
 						},
 					},
 				}),
@@ -444,7 +449,7 @@ describe("MoonshotHandler", () => {
 		it("should enforce strict non-thinking temperature/provider options when reasoning is disabled", async () => {
 			const strictHandler = new MoonshotHandler({
 				...mockOptions,
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 				enableReasoningEffort: false,
 				modelTemperature: 1.9,
 			})

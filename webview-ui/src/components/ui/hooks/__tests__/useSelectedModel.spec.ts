@@ -530,17 +530,17 @@ describe("useSelectedModel", () => {
 	})
 
 	describe("moonshot endpoint restrictions", () => {
-		it("falls back to default Moonshot model when kimi-for-coding is used on non-coding endpoint", () => {
+		it("falls back to default Moonshot model when kimi-k2.7-code is used on non-coding endpoint", () => {
 			const apiConfiguration: ProviderSettings = {
 				apiProvider: "moonshot",
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 				moonshotBaseUrl: "https://api.moonshot.ai/v1",
 			}
 
 			const wrapper = createWrapper()
 			const { result } = renderHook(() => useSelectedModel(apiConfiguration), { wrapper })
 
-			const firstNonCodingMoonshotModelId = Object.keys(moonshotModels).find((id) => id !== "kimi-for-coding")
+			const firstNonCodingMoonshotModelId = Object.keys(moonshotModels).find((id) => id !== "kimi-k2.7-code")
 			expect(result.current.id).toBe(firstNonCodingMoonshotModelId)
 		})
 
@@ -559,17 +559,17 @@ describe("useSelectedModel", () => {
 		})
 		// kilocode_change end
 
-		it("keeps kimi-for-coding when Moonshot coding endpoint is selected", () => {
+		it("keeps kimi-k2.7-code when Moonshot coding endpoint is selected", () => {
 			const apiConfiguration: ProviderSettings = {
 				apiProvider: "moonshot",
-				apiModelId: "kimi-for-coding",
+				apiModelId: "kimi-k2.7-code",
 				moonshotBaseUrl: "https://api.kimi.com/coding/v1",
 			}
 
 			const wrapper = createWrapper()
 			const { result } = renderHook(() => useSelectedModel(apiConfiguration), { wrapper })
 
-			expect(result.current.id).toBe("kimi-for-coding")
+			expect(result.current.id).toBe("kimi-k2.7-code")
 		})
 	})
 

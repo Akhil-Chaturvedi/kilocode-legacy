@@ -349,7 +349,7 @@ const ApiOptions = ({
 				? Object.fromEntries(
 						Object.entries(filteredModels).filter(
 							([modelId]) =>
-								modelId !== "kimi-for-coding" ||
+								modelId !== "kimi-k2.7-code" ||
 								apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1",
 						),
 					)

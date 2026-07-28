@@ -316,43 +316,83 @@ export async function manageContext({
 
 	// Fall back to sliding window truncation if needed
 	if (prevContextTokens > allowedTokens) {
-		const truncationResult = truncateConversation(messages, 0.5, taskId)
+		// kilocode_change start
+		// Overflow recovery with shrinking ratios [0.7, 0.5, 0.35] and retry on failure with backoff
+		// If truncation itself overflows, progressively shrink the input instead of giving up
+		const SHRINKING_RATIOS = [0.7, 0.5, 0.35]
+		const MAX_RETRIES = 5
+		const BACKOFF_MS = 100
 
-		// Calculate new context tokens after truncation by counting non-truncated messages
-		// Messages with truncationParent are hidden, so we count only those without it
-		const effectiveMessages = truncationResult.messages.filter(
-			(msg) => !msg.truncationParent && !msg.isTruncationMarker,
-		)
+		let truncationResult: TruncationResult | null = null
+		let lastError: string | undefined
 
-		// Include system prompt tokens so this value matches what we send to the API.
-		// Note: `prevContextTokens` is computed locally here (totalTokens + lastMessageTokens).
-		let newContextTokensAfterTruncation = await estimateTokenCount(
-			[{ type: "text", text: systemPrompt }],
-			apiHandler,
-		)
+		for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+			const ratioIndex = Math.min(attempt, SHRINKING_RATIOS.length - 1)
+			const fracToRemove = SHRINKING_RATIOS[ratioIndex]
 
-		for (const msg of effectiveMessages) {
-			const content = msg.content
-			if (Array.isArray(content)) {
-				newContextTokensAfterTruncation += await estimateTokenCount(content, apiHandler)
-			} else if (typeof content === "string") {
-				newContextTokensAfterTruncation += await estimateTokenCount(
-					[{ type: "text", text: content }],
+			try {
+				truncationResult = truncateConversation(messages, fracToRemove, taskId)
+
+				// Verify the truncation actually reduced tokens
+				const effectiveMessages = truncationResult.messages.filter(
+					(msg) => !msg.truncationParent && !msg.isTruncationMarker,
+				)
+
+				let newContextTokensAfterTruncation = await estimateTokenCount(
+					[{ type: "text", text: systemPrompt }],
 					apiHandler,
 				)
+
+				for (const msg of effectiveMessages) {
+					const content = msg.content
+					if (Array.isArray(content)) {
+						newContextTokensAfterTruncation += await estimateTokenCount(content, apiHandler)
+					} else if (typeof content === "string") {
+						newContextTokensAfterTruncation += await estimateTokenCount(
+							[{ type: "text", text: content }],
+							apiHandler,
+						)
+					}
+				}
+
+				// Check if truncation was successful (tokens reduced)
+				if (newContextTokensAfterTruncation < prevContextTokens) {
+					return {
+						messages: truncationResult.messages,
+						prevContextTokens,
+						summary: "",
+						cost,
+						error,
+						truncationId: truncationResult.truncationId,
+						messagesRemoved: truncationResult.messagesRemoved,
+						newContextTokensAfterTruncation,
+					}
+				}
+
+				lastError = `Truncation did not reduce tokens (attempt ${attempt + 1})`
+			} catch (e) {
+				lastError = `Truncation failed (attempt ${attempt + 1}): ${e instanceof Error ? e.message : String(e)}`
+			}
+
+			// Backoff before retry
+			if (attempt < MAX_RETRIES - 1) {
+				await new Promise((resolve) => setTimeout(resolve, BACKOFF_MS * (attempt + 1)))
 			}
 		}
 
-		return {
-			messages: truncationResult.messages,
-			prevContextTokens,
-			summary: "",
-			cost,
-			error,
-			truncationId: truncationResult.truncationId,
-			messagesRemoved: truncationResult.messagesRemoved,
-			newContextTokensAfterTruncation,
+		// All retries exhausted, return last result or error
+		if (truncationResult) {
+			return {
+				messages: truncationResult.messages,
+				prevContextTokens,
+				summary: "",
+				cost,
+				error: lastError,
+				truncationId: truncationResult.truncationId,
+				messagesRemoved: truncationResult.messagesRemoved,
+			}
 		}
+		// kilocode_change end
 	}
 	// No truncation or condensation needed
 	return { messages, summary: "", cost, prevContextTokens, error }

@@ -157,7 +157,7 @@ export function getKeepMessagesWithToolBlocks(messages: ApiMessage[], keepCount:
 	}
 }
 
-export const N_MESSAGES_TO_KEEP = 3
+export const N_MESSAGES_TO_KEEP = 4 // kilocode_change: increased from 3 to match Kimi Code's better context preservation
 export const MIN_CONDENSE_THRESHOLD = 5 // Minimum percentage of context window to trigger condensing
 export const MAX_CONDENSE_THRESHOLD = 100 // Maximum percentage of context window to trigger condensing
 
@@ -284,6 +284,32 @@ export async function summarizeConversation(
 	) {
 		console.debug("[summarizeConversation] discarding tool_use", lastMessageToSummarizeContent)
 		messagesToSummarize = messagesToSummarize.slice(0, -1)
+	}
+
+	// Smart split logic: ensure we don't split mid-tool-exchange
+	// If the last message to summarize is an assistant message with tool_use blocks,
+	// and the first kept message is a user message with tool_result blocks,
+	// we need to ensure the tool_use/tool_result pairing is preserved.
+	// This means we should NOT include the assistant message with tool_use in the
+	// summarize region if its corresponding tool_result is in the keep region.
+	const firstKeptMsg = keepMessages[0]
+	if (firstKeptMsg && firstKeptMsg.role === "user" && hasToolResultBlocks(firstKeptMsg)) {
+		const lastMsgToSummarize = messagesToSummarize[messagesToSummarize.length - 1]
+		if (lastMsgToSummarize && lastMsgToSummarize.role === "assistant") {
+			const toolUses = getToolUseBlocks(lastMsgToSummarize)
+			const toolResults = getToolResultBlocks(firstKeptMsg)
+			// Check if any tool_use in the last summarize message has a matching tool_result in the first kept message
+			const hasMatchingToolResult = toolUses.some((tu) =>
+				toolResults.some((tr) => tr.tool_use_id === tu.id),
+			)
+			if (hasMatchingToolResult) {
+				// Move this assistant message to the keep region to preserve the pairing
+				console.debug(
+					"[summarizeConversation] preserving tool_use/tool_result pairing, moving assistant message to keep region",
+				)
+				messagesToSummarize = messagesToSummarize.slice(0, -1)
+			}
+		}
 	}
 	// kilocode_change end
 

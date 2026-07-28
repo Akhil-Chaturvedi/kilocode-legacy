@@ -1,4 +1,5 @@
 import type { ModelInfo } from "../model.js"
+import { MoonshotApiLine } from "../provider-settings.js"
 
 // https://platform.moonshot.ai/
 export type MoonshotModelId = keyof typeof moonshotModels
@@ -7,23 +8,61 @@ export const moonshotDefaultModelId: MoonshotModelId = "kimi-k2-thinking"
 
 export const moonshotModels = {
 	// kilocode_change start
-	"kimi-for-coding": {
-		maxTokens: 32_000,
-		contextWindow: 131_072,
+	"kimi-k3": {
+		maxTokens: 131_072,
+		contextWindow: 1_048_576,
 		supportsImages: true,
 		supportsPromptCache: true,
 		supportsReasoningBinary: true,
 		supportsAdaptiveThinking: true,
-		inputPrice: 0.6, // $0.60 per million tokens (cache miss)
-		outputPrice: 2.5, // $2.50 per million tokens
-		cacheWritesPrice: 0, // $0 per million tokens (cache miss)
-		cacheReadsPrice: 0.15, // $0.15 per million tokens (cache hit)
 		preserveReasoning: true,
 		supportsNativeTools: true,
 		defaultToolProtocol: "native",
 		supportsTemperature: false,
 		defaultTemperature: 0.6,
-		description: `Kimi for coding`,
+		inputPrice: 0.6,
+		outputPrice: 2.5,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0.15,
+		supportsReasoningEffort: ["low", "high", "max"],
+		reasoningEffort: "max",
+		description: "Kimi K3 is Kimi's latest flagship model with 1M context window, always-thinking, and multimodal capabilities (supports text, image, and video input).",
+	},
+	"kimi-k2.7-code": {
+		maxTokens: 32_000,
+		contextWindow: 262_144,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsReasoningBinary: true,
+		supportsAdaptiveThinking: true,
+		inputPrice: 0.6,
+		outputPrice: 2.5,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0.15,
+		preserveReasoning: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		supportsTemperature: false,
+		defaultTemperature: 0.6,
+		description: "Kimi K2.7 Code - optimized for coding tasks with thinking, image, and video capabilities.",
+	},
+	"kimi-k2.7-code-highspeed": {
+		maxTokens: 32_000,
+		contextWindow: 262_144,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsReasoningBinary: true,
+		supportsAdaptiveThinking: true,
+		preserveReasoning: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		supportsTemperature: false,
+		defaultTemperature: 0.6,
+		inputPrice: 0.6,
+		outputPrice: 2.5,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0.15,
+		description: "High-speed variant of kimi-k2.7-code with faster response times, supports image and video input.",
 	},
 	// kilocode_change end
 	"kimi-k2-0711-preview": {
@@ -137,3 +176,21 @@ export const moonshotModels = {
 } as const satisfies Record<string, ModelInfo>
 
 export const MOONSHOT_DEFAULT_TEMPERATURE = 0.6
+
+export const moonshotApiLineConfigs = {
+	international: {
+		name: "International (api.moonshot.ai)",
+		baseUrl: "https://api.moonshot.ai/v1",
+		isChina: false,
+	},
+	china: {
+		name: "China (api.moonshot.cn)",
+		baseUrl: "https://api.moonshot.cn/v1",
+		isChina: true,
+	},
+	managed: {
+		name: "Managed (api.kimi.com/coding)",
+		baseUrl: "https://api.kimi.com/coding/v1",
+		isChina: true,
+	},
+} satisfies Record<MoonshotApiLine, { name: string; baseUrl: string; isChina: boolean }>
